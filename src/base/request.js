@@ -25,9 +25,9 @@ service.interceptors.request.use(
 			})
 		}
 
-		if (localStorage.getItem('token')) {
+		if (sessionStorage.getItem('token')) {
 			// 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
-			config.headers['token'] = localStorage.getItem('token')
+			config.headers['token'] = sessionStorage.getItem('token')
 		}
 		return config
 	},
@@ -47,16 +47,27 @@ service.interceptors.response.use(
 		if (res.status === 200) {
 			if (loadingInstance) loadingInstance.close()
 			return res.data
-		} else {
+		}else if (res.status === 401){
+			Message.error("token")
+			this.$router.push('/Login')
+		}else {
 			if (loadingInstance) loadingInstance.close()
 			Message.error(res.data.msg)
 		}
 	},
 	err => {
-		console.log(err)
-		if (loadingInstance) loadingInstance.close()
-		Message.error('请求失败，请稍后再试')
-		return Promise.reject(err)
+		if (err.response.status === 401){
+			if (loadingInstance) loadingInstance.close()
+			Message.error("token失效！3秒后将跳转至登录页！")
+			setTimeout(()=>{
+				window.location.href = window.location.href.split('#')[0] + "#/login"
+			},3000)
+			return Promise.resolve(err)
+		}else {
+			if (loadingInstance) loadingInstance.close()
+			Message.error('请求失败，请稍后再试')
+			return Promise.reject(err)
+		}
 	}
 )
 

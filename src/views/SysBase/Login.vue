@@ -59,6 +59,7 @@
                 params.pwd = encrypt.encrypt(params.pwd);
                 loginAction(params).then(res=>{
                     if (res.code==0){
+                        sessionStorage.setItem("token",res.data.token);
                         this.$message.success(res.msg)
                     }else{
                         this.$message.error(res.msg)
